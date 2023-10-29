@@ -8,7 +8,7 @@ help: ## This help message
 	@grep -E '^[-a-zA-Z0-9_\.\/]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[32m%-15s\033[0m %s\n", $$1, $$2}'
 
 # Aliases
-precommit: cs-fixer lint phpstan ## Run style fixing and linting commands
+precommit: cs-fixer lint phpstan phpmd ## Run style fixing and linting commands
 scan: cs-fixer lint phpmd phpstan ## Run all scans including mess detection and static analysis
 baseline: phpstan-baseline phpmd-baseline ## Generate baselines for mess detection and static analysis
 build: versions clean vendor node_modules precommit ## Recompile all assets from scratch
