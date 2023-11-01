@@ -1,0 +1,60 @@
+name: Build
+
+# WP Version
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup cache environment
+        id: extcache
+        uses: shivammathur/cache-extensions@v1
+        with:
+          php-version: '8.2'
+          extensions: ${{ env.extensions }}
+          key: extensions-${{ hashFiles('composer.lock') }}
+      - name: Cache extensions
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.extcache.outputs.dir }}
+          key: ${{ steps.extcache.outputs.key }}
+          restore-keys: ${{ steps.extcache.outputs.key }}
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          extensions: ${{ env.extensions }}
+          php-version: '8.2'
+          coverage: none
+          tools: cs2pr
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
+      - name: Add HTTP basic auth credentials
+        run: echo '${{ secrets.COMPOSER_AUTH_JSON }}' > $GITHUB_WORKSPACE/auth.json
+
+      - name: Run composer install
+        run: composer install --no-interaction --no-progress --ansi --prefer-dist
+
+      - name: Syntax Checking
+        run: make lint-ci
+
+      - name: Show linting results in PR
+        run: cs2pr ./report.xml
+
+      - name: PHP Mess Detector
+        run: make phpmd-ci
+
+      - name: Static Analysis
+        run: make phpstan-ci
