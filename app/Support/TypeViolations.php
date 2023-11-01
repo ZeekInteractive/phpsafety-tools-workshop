@@ -29,4 +29,3 @@ class TypeViolations
         return (float) strlen($str); // Intentionally casting the result to float
     }
 }
-

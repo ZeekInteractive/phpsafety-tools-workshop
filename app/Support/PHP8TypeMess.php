@@ -10,7 +10,8 @@ class PHP8TypeMess
         private string $name,
         private int|float $score,
         private array $data
-    ) {}
+    ) {
+    }
 
     public function setName(string|null $name): void
     {
@@ -58,4 +59,3 @@ class PHP8TypeMess
         return ["name" => $this->name, "score" => $this->score]; // Possible mix of return types
     }
 }
-
